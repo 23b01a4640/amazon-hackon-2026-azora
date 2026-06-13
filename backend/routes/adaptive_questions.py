@@ -1,9 +1,14 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter()
 
+class AdaptiveQuestionsRequest(BaseModel):
+    query: str
+
 @router.post("/adaptive-questions")
-def adaptive_questions(query: str):
+def adaptive_questions(request: AdaptiveQuestionsRequest):
+    query = request.query
 
     query = query.lower()
 

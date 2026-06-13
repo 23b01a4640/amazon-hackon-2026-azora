@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Image as ImageIcon, X } from "lucide-react";
 import LoadingOverlay from "./LoadingOverlay";
+import { understandGoal } from "../services/api";
 
 export default function SearchBox({ value, onChange }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -23,16 +24,29 @@ export default function SearchBox({ value, onChange }) {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!value.trim() && !selectedImage) return;
-    
+
     setIsSubmitting(true);
-    
-    // Mock Delay
-    setTimeout(() => {
-      router.push("/questions");
-    }, 2000);
+
+    try {
+      const data = await understandGoal(value);
+      const mission = data.mission;
+
+      if (mission === "Direct Product") {
+        // Direct product search flow — skip questions, go to adaptive questions
+        router.push(`/azora/questions?mode=adaptive&query=${encodeURIComponent(data.search_query || value)}`);
+      } else {
+        // Mission-based flow — go to mission questions
+        router.push(`/azora/questions?mission=${encodeURIComponent(mission)}`);
+      }
+    } catch (error) {
+      console.error("Error understanding goal:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

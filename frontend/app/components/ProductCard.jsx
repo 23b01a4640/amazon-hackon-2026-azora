@@ -1,7 +1,15 @@
 import { Star } from "lucide-react";
 
 export default function ProductCard({ product }) {
-  const { name, seller, imageUrl, price, rating, reviewCount, description, amazonUrl } = product;
+  // Support both mock format (imageUrl, seller) and backend format (image_url, brand)
+  const name = product.name;
+  const seller = product.seller || product.brand || "Amazon";
+  const imageUrl = product.imageUrl || product.image_url || "https://via.placeholder.com/200";
+  const price = product.price;
+  const rating = product.rating || 4.0;
+  const reviewCount = product.reviewCount || product.reviews || 0;
+  const description = product.description || "";
+  const amazonUrl = product.amazonUrl || "#";
 
   return (
     <div className="flex flex-col md:flex-row gap-6 p-4 border border-[#334155] rounded-xl bg-[#1E293B] transition-colors hover:bg-[#1E293B]/80">

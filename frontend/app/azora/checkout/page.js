@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import CheckoutSummary from "../components/CheckoutSummary";
-import ProductCheckoutCard from "../components/ProductCheckoutCard";
-import OrderBreakdown from "../components/OrderBreakdown";
-import SavingsCard from "../components/SavingsCard";
-import CheckoutCTA from "../components/CheckoutCTA";
-import LoadingOverlay from "../components/LoadingOverlay";
+import CheckoutSummary from "../../components/CheckoutSummary";
+import ProductCheckoutCard from "../../components/ProductCheckoutCard";
+import SavingsCard from "../../components/SavingsCard";
+import CheckoutCTA from "../../components/CheckoutCTA";
+import LoadingOverlay from "../../components/LoadingOverlay";
 import { ArrowLeft } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -21,7 +20,7 @@ export default function CheckoutPage() {
     if (saved) {
       setBundle(JSON.parse(saved));
     } else {
-      router.push("/bundles");
+      router.push("/azora/bundles");
     }
   }, [router]);
 
@@ -30,10 +29,8 @@ export default function CheckoutPage() {
     setLoadingMessage("🛒 Adding products to cart...");
     
     setTimeout(() => {
-      setIsSubmitting(false);
-      alert(`✓ ${bundle.products.length} products added to cart\n\nTotal Bundle Value: ₹${bundle.price.toLocaleString()}\n\n(Hackathon Demo End)`);
-      router.push("/");
-    }, 2000);
+      router.push("/azora/redirect");
+    }, 1500);
   };
 
   if (!bundle) return null;
@@ -42,7 +39,6 @@ export default function CheckoutPage() {
     <div className="flex flex-col w-full min-h-[calc(100vh-72px)] bg-[#0F172A] pb-32 pt-8">
       <div className="w-full max-w-2xl mx-auto px-4">
         
-        {/* Back button */}
         <button 
           onClick={() => router.back()}
           className="flex items-center gap-2 text-[#00A8E1] hover:text-[#FF9900] transition-colors mb-8 font-medium w-fit"
@@ -53,7 +49,6 @@ export default function CheckoutPage() {
 
         <CheckoutSummary bundle={bundle} />
 
-        {/* Products List */}
         <div className="mb-8 bg-[#111827] border border-[#334155] rounded-xl overflow-hidden shadow-sm">
           <h3 className="text-white text-sm font-bold p-4 border-b border-[#334155] uppercase tracking-wider bg-[#1E293B]">
             Products Included ({bundle.products.length})

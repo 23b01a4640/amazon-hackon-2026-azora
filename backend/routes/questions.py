@@ -1,9 +1,14 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter()
 
+class QuestionsRequest(BaseModel):
+    mission: str
+
 @router.post("/questions")
-def get_questions(mission: str):
+def get_questions(request: QuestionsRequest):
+    mission = request.mission
 
     mission = mission.lower()
 

@@ -1,11 +1,15 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter()
 
-@router.post("/understand")
-def understand_mission(query: str):
+class UnderstandRequest(BaseModel):
+    query: str
 
-    query = query.lower()
+@router.post("/understand")
+def understand_mission(request: UnderstandRequest):
+
+    query = request.query.lower()
 
     if "apartment" in query:
         return {"mission": "New Apartment"}
@@ -22,4 +26,4 @@ def understand_mission(query: str):
     if "skin" in query:
         return {"mission": "Skincare"}
 
-    return {"mission": "Unknown"}
+    return {"mission": "Direct Product", "search_query": request.query}
