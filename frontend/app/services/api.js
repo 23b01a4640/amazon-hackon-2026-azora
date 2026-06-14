@@ -77,3 +77,44 @@ export const searchProducts = async (query) => {
   if (!response.ok) throw new Error("Failed to search products");
   return await response.json();
 };
+
+/**
+ * POST /products/smart-search
+ * Sends query + user answers, returns filtered & ranked products
+ * Falls back to regular search if smart-search fails
+ */
+export const smartSearchProducts = async (query, answers = []) => {
+  try {
+    const response = await fetch(`${API_BASE}/products/smart-search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, answers }),
+    });
+
+    if (!response.ok) throw new Error("Smart search failed");
+    return await response.json();
+  } catch (error) {
+    // Fallback to regular search
+    console.warn("Smart search unavailable, falling back to regular search:", error.message);
+    const response = await fetch(`${API_BASE}/products/search?query=${encodeURIComponent(query)}`);
+    if (!response.ok) throw new Error("Failed to search products");
+    return await response.json();
+  }
+};
+
+/**
+ * POST /image-search
+ * Sends an image file, returns { mission, detected_categories, products }
+ */
+export const imageSearch = async (imageFile) => {
+  const formData = new FormData();
+  formData.append("image", imageFile);
+
+  const response = await fetch(`${API_BASE}/image-search`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error("Image search failed");
+  return await response.json();
+};

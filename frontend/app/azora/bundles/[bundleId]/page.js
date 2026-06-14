@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getProductsByMission } from "../../../services/api";
 import ProductCard from "../../../components/ProductCard";
+import TrustLayer from "../../../components/TrustLayer";
 import LoadingOverlay from "../../../components/LoadingOverlay";
 import { ArrowLeft, ShieldCheck, Trash2, Plus, X } from "lucide-react";
 import React from "react";
@@ -157,6 +158,11 @@ export default function BundleDetailsPage({ params }) {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Trust Layer */}
+        <div className="mb-12 border border-[#334155] rounded-2xl overflow-hidden bg-[#1E293B]">
+          <TrustLayer bundle={bundle} />
         </div>
 
         {showAddProduct && (

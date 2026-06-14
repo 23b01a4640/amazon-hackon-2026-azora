@@ -18,13 +18,13 @@ const goals = [
   },
   {
     id: 4,
-    title: "Home Office",
-    image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?q=80&w=300&auto=format&fit=crop",
+    title: "Pasta Preparation",
+    image: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?q=80&w=300&auto=format&fit=crop",
   },
   {
     id: 5,
     title: "Skincare",
-    image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?q=80&w=300&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=300&auto=format&fit=crop",
   },
 ];
 

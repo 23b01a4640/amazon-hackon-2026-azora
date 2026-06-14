@@ -4,11 +4,13 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Image as ImageIcon, X } from "lucide-react";
 import LoadingOverlay from "./LoadingOverlay";
-import { understandGoal } from "../services/api";
+import { understandGoal, imageSearch } from "../services/api";
 
 export default function SearchBox({ value, onChange }) {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("⏳ Understanding your goal...");
   const fileInputRef = useRef(null);
   const router = useRouter();
 
@@ -16,33 +18,45 @@ export default function SearchBox({ value, onChange }) {
     const file = e.target.files[0];
     if (file) {
       setSelectedImage(URL.createObjectURL(file));
+      setSelectedFile(file);
     }
   };
 
   const handleRemoveImage = () => {
     setSelectedImage(null);
+    setSelectedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!value.trim() && !selectedImage) return;
+    if (!value.trim() && !selectedFile) return;
 
     setIsSubmitting(true);
 
     try {
+      // If image is uploaded, use image search
+      if (selectedFile) {
+        setLoadingMessage("🔍 Analyzing your image...");
+        const result = await imageSearch(selectedFile);
+        // Store image search results in localStorage and navigate
+        localStorage.setItem("imageSearchResults", JSON.stringify(result));
+        router.push("/azora/bundles?mode=image");
+        return;
+      }
+
+      // Text-based search
+      setLoadingMessage("⏳ Understanding your goal...");
       const data = await understandGoal(value);
       const mission = data.mission;
 
       if (mission === "Direct Product") {
-        // Direct product search flow — skip questions, go to adaptive questions
         router.push(`/azora/questions?mode=adaptive&query=${encodeURIComponent(data.search_query || value)}`);
       } else {
-        // Mission-based flow — go to mission questions
         router.push(`/azora/questions?mission=${encodeURIComponent(mission)}`);
       }
     } catch (error) {
-      console.error("Error understanding goal:", error);
+      console.error("Error:", error);
       alert("Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -106,7 +120,7 @@ export default function SearchBox({ value, onChange }) {
         </div>
       </form>
 
-      <LoadingOverlay isLoading={isSubmitting} message="⏳ Understanding your goal..." />
+      <LoadingOverlay isLoading={isSubmitting} message={loadingMessage} />
     </>
   );
 }

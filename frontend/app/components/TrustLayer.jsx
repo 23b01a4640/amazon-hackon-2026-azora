@@ -1,18 +1,17 @@
 import { CheckCircle } from "lucide-react";
 
 export default function TrustLayer({ bundle }) {
-  if (!bundle) return null;
+  if (!bundle || !bundle.products || bundle.products.length === 0) return null;
 
-  const totalReviews = bundle.products.reduce((acc, p) => acc + p.reviewCount, 0);
-  const avgRating = (bundle.products.reduce((acc, p) => acc + p.rating, 0) / bundle.products.length).toFixed(1);
+  const avgRating = (bundle.products.reduce((acc, p) => acc + (p.rating || 0), 0) / bundle.products.length).toFixed(1);
 
   const reasons = [
-    `Average product rating: ${avgRating}+`,
-    `${totalReviews.toLocaleString()}+ combined customer reviews`,
+    `Average product rating: ${avgRating}★`,
+    `${bundle.products.length} curated products in this bundle`,
     `Stays within your ₹${bundle.price.toLocaleString()} budget`,
-    `Covers 100% of identified apartment essentials`,
+    `All essentials covered for your mission`,
     `Best quality-to-price ratio among generated bundles`,
-    `Products selected from highly rated sellers`
+    `Products selected from highly rated sellers`,
   ];
 
   return (

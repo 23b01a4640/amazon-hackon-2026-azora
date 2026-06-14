@@ -7,7 +7,7 @@ export default function ProductCard({ product }) {
   const imageUrl = product.imageUrl || product.image_url || "https://via.placeholder.com/200";
   const price = product.price;
   const rating = product.rating || 4.0;
-  const reviewCount = product.reviewCount || product.reviews || 0;
+  const reviewCount = typeof product.reviewCount === "number" ? product.reviewCount : (typeof product.reviews === "number" ? product.reviews : null);
   const description = product.description || "";
   const amazonUrl = product.amazonUrl || "#";
 
@@ -42,7 +42,9 @@ export default function ProductCard({ product }) {
             ))}
           </div>
           <span className="text-gray-300 text-sm ml-1">{rating}</span>
-          <span className="text-[#00A8E1] text-sm ml-2 hover:underline cursor-pointer">{reviewCount} ratings</span>
+          {reviewCount !== null && (
+            <span className="text-[#00A8E1] text-sm ml-2 hover:underline cursor-pointer">{reviewCount} ratings</span>
+          )}
         </div>
 
         {/* Price */}

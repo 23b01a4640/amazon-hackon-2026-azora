@@ -89,6 +89,9 @@ function QuestionsContent() {
   const handleNext = () => {
     if (isLastQuestion) {
       setIsSubmitting(true);
+      // Store answers for the search/bundle page to use
+      const answersArray = Object.values(answers);
+      localStorage.setItem("userAnswers", JSON.stringify(answersArray));
       if (mode === "adaptive") {
         router.push(`/azora/bundles?mode=search&query=${encodeURIComponent(query)}`);
       } else {
@@ -107,8 +110,15 @@ function QuestionsContent() {
     }
   };
 
-  const getOptionsForQuestion = (questionText) => {
-    const q = questionText.toLowerCase();
+  // Handle both formats:
+  // - Adaptive: { question: "...", options: [...] }
+  // - Mission: plain string "..."
+  const isObjectQuestion = typeof currentQuestion === "object" && currentQuestion !== null;
+  const questionText = isObjectQuestion ? currentQuestion.question : currentQuestion;
+  
+  // Get options: from the object if adaptive, or fallback mapping for mission questions
+  const getOptionsForMissionQuestion = (text) => {
+    const q = text.toLowerCase();
     if (q.includes("budget")) return ["₹2000", "₹5000", "₹10000", "₹15000+"];
     if (q.includes("how many people")) return ["1", "2", "3+"];
     if (q.includes("beginner or experienced")) return ["Beginner", "Experienced"];
@@ -126,7 +136,9 @@ function QuestionsContent() {
     return null;
   };
 
-  const options = getOptionsForQuestion(currentQuestion);
+  const options = isObjectQuestion 
+    ? (currentQuestion.options && currentQuestion.options.length > 0 ? currentQuestion.options : null)
+    : getOptionsForMissionQuestion(currentQuestion);
 
   return (
     <div className="flex flex-col w-full min-h-[calc(100vh-72px)] bg-[#0F172A]">
@@ -153,7 +165,7 @@ function QuestionsContent() {
         />
 
         <div className="flex-1 flex flex-col justify-center">
-          <QuestionCard questionText={currentQuestion}>
+          <QuestionCard questionText={questionText}>
             {options ? (
               options.map((option) => (
                 <OptionCard
@@ -209,7 +221,7 @@ function QuestionsContent() {
                 : "bg-[#00A8E1] hover:bg-[#0089B8] text-white shadow-[0_0_15px_rgba(0,168,225,0.4)]"
             }`}
           >
-            {isLastQuestion ? "Generate My Bundle" : "Next"}
+            {isLastQuestion ? (mode === "adaptive" ? "Find Products" : "Generate My Bundle") : "Next"}
           </button>
         </div>
 

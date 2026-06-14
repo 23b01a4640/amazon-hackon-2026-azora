@@ -1,22 +1,13 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+from services.groq_service import detect_mission
 
 router = APIRouter()
 
 class UnderstandRequest(BaseModel):
     query: str
 
-# Mission keywords — only match if the query is clearly about the mission (goal-oriented),
-# not about a specific product.
-MISSION_PATTERNS = {
-    "New Apartment": ["new apartment", "moving into", "apartment setup", "shifting to new"],
-    "Start Running": ["start running", "begin running", "running routine", "jogging routine"],
-    "Pasta Preparation": ["pasta preparation", "cook pasta", "making pasta", "prepare pasta"],
-    "College Starter": ["college starter", "starting college", "college essentials", "going to college"],
-    "Skincare": ["skincare routine", "skin care routine", "skincare regimen", "skin routine"],
-}
-
-# Product keywords — if ANY of these appear, treat as direct product search
+# Fallback: Product keywords — if ANY of these appear, treat as direct product search
 PRODUCT_KEYWORDS = [
     "shoe", "shoes", "bottle", "lamp", "pillow", "bedsheet", "bed sheet",
     "cable", "charger", "phone", "laptop", "earphone", "headphone",
@@ -30,31 +21,39 @@ PRODUCT_KEYWORDS = [
 ]
 
 
-@router.post("/understand")
-def understand_mission(request: UnderstandRequest):
-    query = request.query.lower().strip()
+def fallback_classify(query: str, original_query: str) -> dict:
+    """Keyword-based fallback if Groq is unavailable or fails."""
+    query_lower = query.lower().strip()
 
-    # First check — if the query contains a specific product keyword,
-    # it's a direct product search regardless of mission words.
     for keyword in PRODUCT_KEYWORDS:
-        if keyword in query:
-            return {"mission": "Direct Product", "search_query": request.query}
+        if keyword in query_lower:
+            return {"mission": "Direct Product", "search_query": original_query}
 
-    # Second check — match against mission patterns (phrase-level)
-    for mission, patterns in MISSION_PATTERNS.items():
-        for pattern in patterns:
-            if pattern in query:
-                return {"mission": mission}
-
-    # Third check — loose single-word match for missions (fallback)
-    if "apartment" in query:
+    if "apartment" in query_lower or "flat" in query_lower or "moving" in query_lower:
         return {"mission": "New Apartment"}
-    if "college" in query:
-        return {"mission": "College Starter"}
-    if "pasta" in query:
+    if "running" in query_lower or "jogging" in query_lower or "jog" in query_lower:
+        return {"mission": "Start Running"}
+    if "pasta" in query_lower or "cook" in query_lower:
         return {"mission": "Pasta Preparation"}
-    if "skincare" in query or "skin care" in query:
+    if "college" in query_lower or "university" in query_lower:
+        return {"mission": "College Starter"}
+    if "skin" in query_lower:
         return {"mission": "Skincare"}
 
-    # Default — treat as direct product search
-    return {"mission": "Direct Product", "search_query": request.query}
+    return {"mission": "Direct Product", "search_query": original_query}
+
+
+@router.post("/understand")
+def understand_mission(request: UnderstandRequest):
+    query = request.query
+
+    # Try Groq LLM classification
+    mission = detect_mission(query)
+
+    if mission:
+        if mission == "Direct Product":
+            return {"mission": "Direct Product", "search_query": query}
+        return {"mission": mission}
+
+    # Fallback to keyword matching if Groq fails
+    return fallback_classify(query, query)

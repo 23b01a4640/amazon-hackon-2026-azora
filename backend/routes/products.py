@@ -23,7 +23,7 @@ def get_products_by_mission(mission_name: str):
 
 @router.get("/products/search")
 def search_products(query: str):
-    # Search by name
+    # Search by name (strongest match)
     name_response = (
         supabase.table("products")
         .select("*")
@@ -31,7 +31,7 @@ def search_products(query: str):
         .execute()
     )
 
-    # Search by category
+    # Search by category (strong match)
     category_response = (
         supabase.table("products")
         .select("*")
@@ -39,21 +39,26 @@ def search_products(query: str):
         .execute()
     )
 
-    # Search by description
-    description_response = (
-        supabase.table("products")
-        .select("*")
-        .ilike("description", f"%{query}%")
-        .execute()
-    )
-
-    # Merge results, deduplicate by id
+    # Merge name + category results (primary results)
     seen_ids = set()
     results = []
 
-    for product in name_response.data + category_response.data + description_response.data:
+    for product in name_response.data + category_response.data:
         if product["id"] not in seen_ids:
             seen_ids.add(product["id"])
             results.append(product)
+
+    # Only search description if no name/category matches found
+    if not results:
+        description_response = (
+            supabase.table("products")
+            .select("*")
+            .ilike("description", f"%{query}%")
+            .execute()
+        )
+        for product in description_response.data:
+            if product["id"] not in seen_ids:
+                seen_ids.add(product["id"])
+                results.append(product)
 
     return results

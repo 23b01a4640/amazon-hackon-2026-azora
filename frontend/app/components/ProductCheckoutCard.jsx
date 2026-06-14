@@ -4,7 +4,7 @@ export default function ProductCheckoutCard({ product }) {
   const imageUrl = product.imageUrl || product.image_url || "https://via.placeholder.com/80";
   const seller = product.seller || product.brand || "Amazon";
   const rating = product.rating || 4.0;
-  const reviewCount = product.reviewCount || product.reviews || 0;
+  const reviewCount = typeof product.reviewCount === "number" ? product.reviewCount : (typeof product.reviews === "number" ? product.reviews : null);
 
   return (
     <div className="flex flex-row gap-4 p-4 border-b border-[#334155] bg-[#111827] items-center last:border-b-0">
@@ -17,7 +17,9 @@ export default function ProductCheckoutCard({ product }) {
         <div className="flex items-center gap-1 text-xs text-gray-300">
           <Star size={12} className="text-[#FF9900]" fill="currentColor" />
           <span className="text-[#FF9900] font-bold">{rating}</span>
-          <span className="hidden sm:inline">({reviewCount.toLocaleString()} reviews)</span>
+          {reviewCount !== null && (
+            <span className="hidden sm:inline">({reviewCount.toLocaleString()} reviews)</span>
+          )}
         </div>
       </div>
       <div className="text-white font-bold text-base md:text-lg whitespace-nowrap pl-2">
