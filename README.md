@@ -1,12 +1,12 @@
-<h1 align="center">✨ Azora — Amazon Mission Control</h1>
+<h1 align="center"> Azora — Amazon Goal Control</h1>
 
 ---
 
 ## 📌 Description
 
-🌟 **Azora** is an AI-powered goal-based shopping assistant that integrates with Amazon to help users shop by *mission* instead of searching for products one by one.
+🌟 **Azora** is an AI-powered goal-based shopping assistant that integrates with Amazon to help users shop by *goal* instead of searching for products one by one.
 
-💡 Instead of asking "What product do you want?", Azora asks "What are you trying to achieve?" — then generates personalized product bundles using AI, adaptive questioning, and persistent customer memory.
+💡 Instead of asking "What product do you want?", Azora asks "What are you trying to achieve?"  then generates personalized product bundles using AI, adaptive questioning, and persistent customer memory.
 
 🎯 Built for the **Amazon HackOn 2026** hackathon.
 
@@ -14,9 +14,9 @@
 
 ## 🚀 Features
 
-✔️ **Mission-Based Shopping** – Users describe a goal (e.g., "Moving into a new apartment") and Azora generates complete product bundles (Essentials, Best Value, Premium)
+✔️ **Goal-Based Shopping** – Users describe a goal (e.g., "Moving into a new apartment") and Azora generates complete product bundles (Essentials, Best Value, Premium)
 
-✔️ **AI Mission Understanding** – Groq LLM classifies user queries into missions or direct product searches with natural language understanding
+✔️ **AI Goal Understanding** – Groq LLM classifies user queries into goals or direct product searches with natural language understanding
 
 ✔️ **Adaptive Questions** – AI generates contextual clarifying questions with relevant options specific to each product type
 
@@ -36,7 +36,7 @@
 
 ✔️ **Search History** – Recent searches displayed on homepage for quick re-access
 
-📌 *Two modes: Mission-based shopping (bundles) and Direct product search (individual items with adaptive filtering)*
+📌 *Two modes: Goal-based shopping (bundles) and Direct product search (individual items with adaptive filtering)*
 
 ---
 
@@ -134,10 +134,10 @@ amazon-hackon-2026-azora/
 │   │   ├── groq_service.py        # Groq LLM integration
 │   │   └── memory_service.py      # User memory & personalization
 │   ├── routes/
-│   │   ├── understand.py          # POST /understand (mission classification)
-│   │   ├── questions.py           # POST /questions (mission questions)
+│   │   ├── understand.py          # POST /understand (goal classification)
+│   │   ├── questions.py           # POST /questions (goal questions)
 │   │   ├── adaptive_questions.py  # POST /adaptive-questions (AI-generated)
-│   │   ├── bundles.py             # GET /bundles/{mission} (personalized)
+│   │   ├── bundles.py             # GET /bundles/{goal} (personalized)
 │   │   ├── products.py            # GET /products/search
 │   │   ├── smart_search.py        # POST /products/smart-search
 │   │   ├── image_search.py        # POST /image-search (vision)
@@ -172,10 +172,10 @@ Login/Signup → Amazon Homepage → Click Azora Icon
 Azora Homepage (Search by text, image, or goal cards)
        ↓
 ┌──────────────────────────────────────────┐
-│  Mission Flow          │  Product Flow   │
+│  Goal Flow          │  Product Flow   │
 │  "New Apartment"       │  "Running Shoes"│
 │       ↓                │       ↓         │
-│  Mission Questions     │  Adaptive Q's   │
+│  Goal Questions     │  Adaptive Q's   │
 │       ↓                │       ↓         │
 │  Personalized Bundles  │  Filtered Results│
 │  (Essentials/Best/     │  (Budget+Type)  │
@@ -195,7 +195,7 @@ Azora Homepage (Search by text, image, or goal cards)
 
 | Feature | Model | Purpose |
 |---------|-------|---------|
-| Mission Classification | Llama 3.1 8B | Understand user intent from natural language |
+| Goal Classification | Llama 3.1 8B | Understand user intent from natural language |
 | Adaptive Questions | Llama 3.1 8B | Generate contextual questions with options |
 | Image Search | Llama 4 Scout 17B | Identify products from uploaded photos |
 | Personalization | Memory Service | Exclude purchased items, prefer brands |
@@ -206,8 +206,8 @@ Azora Homepage (Search by text, image, or goal cards)
 
 | Table | Purpose |
 |-------|---------|
-| `products` | 65+ products across 5 missions |
-| `search_history` | User search queries & detected missions |
+| `products` | 65+ products across 5 goals |
+| `search_history` | User search queries & detected goals |
 | `user_purchases` | Purchase history for personalization |
 | `user_interactions` | Product add/remove tracking |
 
@@ -217,8 +217,8 @@ Azora Homepage (Search by text, image, or goal cards)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/understand` | Classify user query into mission |
-| POST | `/questions` | Get mission-specific questions |
+| POST | `/understand` | Classify user query into goals |
+| POST | `/questions` | Get goal-specific questions |
 | POST | `/adaptive-questions` | AI-generated product questions |
 | GET | `/bundles/{mission}` | Personalized bundle generation |
 | GET | `/products/search` | Search products by keyword |
@@ -226,7 +226,7 @@ Azora Homepage (Search by text, image, or goal cards)
 | POST | `/image-search` | Vision-based product discovery |
 | POST | `/memory/purchase` | Save purchase history |
 | POST | `/memory/interaction` | Save product interactions |
-| GET | `/products/mission/{name}` | All products for a mission |
+| GET | `/products/mission/{name}` | All products for a goal |
 
 ---
 
