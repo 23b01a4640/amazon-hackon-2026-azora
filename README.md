@@ -210,8 +210,6 @@ Azora Homepage (Search by text, image, or goal cards)
 | `search_history` | User search queries & detected missions |
 | `user_purchases` | Purchase history for personalization |
 | `user_interactions` | Product add/remove tracking |
-| `mission_templates` | Mission definitions |
-| `category_priorities` | Category priority info |
 
 ---
 
@@ -234,7 +232,7 @@ Azora Homepage (Search by text, image, or goal cards)
 
 ## 👥 Team
 
-Built by **Team Azora** for Amazon HackOn 2026.
+Built by **Team Syntax Sirens** for Amazon HackOn 2026.
 
 ---
 
