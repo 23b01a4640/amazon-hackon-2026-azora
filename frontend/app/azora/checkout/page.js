@@ -29,8 +29,8 @@ export default function CheckoutPage() {
     setLoadingMessage("🛒 Adding products to cart...");
     
     setTimeout(() => {
-      router.push("/azora/redirect");
-    }, 1500);
+      router.push("/amazon");
+    }, 1000);
   };
 
   if (!bundle) return null;

@@ -174,13 +174,13 @@ export default function AmazonHomePage() {
             </div>
             <div className="flex flex-col items-center">
               <div className="w-full h-20 rounded overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1513519245088-0e12902e35ca?q=80&w=200&auto=format&fit=crop" alt="Vases" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?q=80&w=200&auto=format&fit=crop" alt="Vases" className="w-full h-full object-cover" />
               </div>
               <span className="text-xs text-[#131921] mt-1 text-center">Figurines & vases</span>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-full h-20 rounded overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=200&auto=format&fit=crop" alt="Storage" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?q=80&w=200&auto=format&fit=crop" alt="Storage" className="w-full h-full object-cover" />
               </div>
               <span className="text-xs text-[#131921] mt-1 text-center">Home storage</span>
             </div>
