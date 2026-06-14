@@ -316,11 +316,7 @@ export default function AmazonHomePage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-[#232F3E] text-white text-center py-6 text-sm mt-auto">
-        <p className="text-gray-400 mb-2">Amazon.in Demo — Azora Mission Control Integration</p>
-        <p className="text-gray-500 text-xs">Click the ✨ Azora icon in the navbar to start goal-based shopping</p>
-      </footer>
+
     </div>
   );
 }

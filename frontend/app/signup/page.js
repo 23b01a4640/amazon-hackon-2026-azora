@@ -147,10 +147,7 @@ export default function SignupPage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="mt-10 pt-4 border-t border-[#e7e7e7] w-full max-w-[350px] text-center">
-        <p className="text-xs text-gray-500">Powered by Azora — AI Shopping Assistant</p>
-      </div>
+
     </div>
   );
 }
