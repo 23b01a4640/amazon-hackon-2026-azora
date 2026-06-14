@@ -299,10 +299,7 @@ export default function AmazonCartPage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-[#232F3E] text-white text-center py-4 text-sm mt-auto">
-        <p className="text-gray-400">This is a demo simulation for Azora — Amazon Mission Control</p>
-      </footer>
+
     </div>
   );
 }
