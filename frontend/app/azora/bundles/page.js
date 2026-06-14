@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getBundles, smartSearchProducts } from "../../services/api";
+import { supabase } from "../../lib/supabase";
 import BundleCard from "../../components/BundleCard";
 import ProductCard from "../../components/ProductCard";
 import LoadingOverlay from "../../components/LoadingOverlay";
@@ -37,7 +38,10 @@ function BundlesContent() {
           const products = await smartSearchProducts(query, answers);
           setSearchResults(products);
         } else if (mission) {
-          const data = await getBundles(mission);
+          // Get user_id for personalized bundles
+          const { data: { session } } = await supabase.auth.getSession();
+          const userId = session?.user?.id || null;
+          const data = await getBundles(mission, userId);
           setBundleData(data);
         } else {
           router.push("/azora");

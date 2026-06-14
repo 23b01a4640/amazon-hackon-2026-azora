@@ -87,36 +87,43 @@ def smart_search(request: SmartSearchRequest):
     if not all_products:
         return []
 
-    # STRICT budget filtering — remove anything above budget
+    # Budget filtering — prefer products within budget, but don't return empty
     budget = extract_budget(answers)
     if budget:
-        all_products = [p for p in all_products if p["price"] <= budget]
+        within_budget = [p for p in all_products if p["price"] <= budget]
+        if within_budget:
+            all_products = within_budget
+        else:
+            # No products within budget — sort by price (cheapest first) so user sees closest options
+            all_products.sort(key=lambda p: p.get("price", 0))
 
-    # If no products within budget, return empty
     if not all_products:
         return []
 
     # Filter by answer keywords (e.g., "Glass", "Insulated", "Spiral")
     filter_keywords = extract_filter_keywords(answers)
     if filter_keywords:
-        # Filter products that match at least one keyword
+        # Score products by how well they match filter keywords
         filtered = []
+        unfiltered = []
         for product in all_products:
             product_text = f"{product.get('name', '')} {product.get('description', '')} {product.get('category', '')}".lower()
             matches = sum(1 for kw in filter_keywords if kw in product_text)
             if matches > 0:
                 product["_match_score"] = matches
                 filtered.append(product)
+            else:
+                unfiltered.append(product)
 
-        # STRICT: Only show products matching the user's preference
-        # If nothing matches, return empty — don't show irrelevant products
+        # Prefer matching products, but fall back to all if none match
         if filtered:
-            all_products = filtered
-            all_products.sort(key=lambda p: (-p.get("_match_score", 0), -p.get("rating", 0), p.get("price", 0)))
-            for p in all_products:
+            filtered.sort(key=lambda p: (-p.get("_match_score", 0), -p.get("rating", 0), p.get("price", 0)))
+            for p in filtered:
                 p.pop("_match_score", None)
+            all_products = filtered
         else:
-            return []
+            # No keyword matches — return all products (sorted by rating)
+            all_products.sort(key=lambda p: (-p.get("rating", 0), p.get("price", 0)))
     else:
         # No filter keywords — sort by rating
         all_products.sort(key=lambda p: (-p.get("rating", 0), p.get("price", 0)))

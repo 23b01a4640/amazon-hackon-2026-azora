@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search, Image as ImageIcon, X } from "lucide-react";
 import LoadingOverlay from "./LoadingOverlay";
 import { understandGoal, imageSearch } from "../services/api";
+import { supabase } from "../lib/supabase";
 
 export default function SearchBox({ value, onChange }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -13,6 +14,22 @@ export default function SearchBox({ value, onChange }) {
   const [loadingMessage, setLoadingMessage] = useState("⏳ Understanding your goal...");
   const fileInputRef = useRef(null);
   const router = useRouter();
+
+  const saveToHistory = async (query, mission, mode) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase.from("search_history").insert({
+          user_id: session.user.id,
+          query,
+          mission,
+          mode,
+        });
+      }
+    } catch (err) {
+      console.warn("Failed to save history:", err);
+    }
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -39,8 +56,8 @@ export default function SearchBox({ value, onChange }) {
       if (selectedFile) {
         setLoadingMessage("🔍 Analyzing your image...");
         const result = await imageSearch(selectedFile);
-        // Store image search results in localStorage and navigate
         localStorage.setItem("imageSearchResults", JSON.stringify(result));
+        await saveToHistory("Image search", result.mission || "Unknown", "image");
         router.push("/azora/bundles?mode=image");
         return;
       }
@@ -51,8 +68,10 @@ export default function SearchBox({ value, onChange }) {
       const mission = data.mission;
 
       if (mission === "Direct Product") {
+        await saveToHistory(value, "Direct Product", "product");
         router.push(`/azora/questions?mode=adaptive&query=${encodeURIComponent(data.search_query || value)}`);
       } else {
+        await saveToHistory(value, mission, "mission");
         router.push(`/azora/questions?mission=${encodeURIComponent(mission)}`);
       }
     } catch (error) {

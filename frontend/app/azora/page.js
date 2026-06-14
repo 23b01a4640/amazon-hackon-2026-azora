@@ -3,6 +3,7 @@
 import { useState } from "react";
 import HeroSection from "../components/HeroSection";
 import SearchBox from "../components/SearchBox";
+import RecentSearches from "../components/RecentSearches";
 import GoalGrid from "../components/GoalGrid";
 import HowItWorks from "../components/HowItWorks";
 
@@ -17,6 +18,8 @@ export default function AzoraHome() {
         value={goalText} 
         onChange={setGoalText} 
       />
+
+      <RecentSearches />
       
       <GoalGrid 
         onSelectGoal={(title) => setGoalText(title)} 

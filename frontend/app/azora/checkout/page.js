@@ -8,6 +8,8 @@ import SavingsCard from "../../components/SavingsCard";
 import CheckoutCTA from "../../components/CheckoutCTA";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import { ArrowLeft } from "lucide-react";
+import { savePurchase } from "../../services/api";
+import { supabase } from "../../lib/supabase";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -24,10 +26,23 @@ export default function CheckoutPage() {
     }
   }, [router]);
 
-  const handleProceed = () => {
+  const handleProceed = async () => {
     setIsSubmitting(true);
     setLoadingMessage("🛒 Adding products to cart...");
-    
+
+    // Save all products as purchases
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user && bundle?.products) {
+        const mission = localStorage.getItem("currentMission") || null;
+        for (const product of bundle.products) {
+          await savePurchase(session.user.id, product, mission);
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to save purchase history:", err);
+    }
+
     setTimeout(() => {
       router.push("/amazon");
     }, 1000);

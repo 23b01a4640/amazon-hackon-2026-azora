@@ -49,8 +49,12 @@ export const getAdaptiveQuestions = async (query) => {
  * GET /bundles/{mission_name}
  * Returns { mission, essentials: [...], best_value: [...], premium: [...] }
  */
-export const getBundles = async (mission) => {
-  const response = await fetch(`${API_BASE}/bundles/${encodeURIComponent(mission)}`);
+export const getBundles = async (mission, userId = null) => {
+  let url = `${API_BASE}/bundles/${encodeURIComponent(mission)}`;
+  if (userId) {
+    url += `?user_id=${encodeURIComponent(userId)}`;
+  }
+  const response = await fetch(url);
 
   if (!response.ok) throw new Error("Failed to fetch bundles");
   return await response.json();
@@ -117,4 +121,50 @@ export const imageSearch = async (imageFile) => {
 
   if (!response.ok) throw new Error("Image search failed");
   return await response.json();
+};
+
+/**
+ * POST /memory/purchase
+ * Save a product purchase to user history
+ */
+export const savePurchase = async (userId, product, mission = null) => {
+  try {
+    await fetch(`${API_BASE}/memory/purchase`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        product_name: product.name,
+        category: product.category || null,
+        brand: product.brand || product.seller || null,
+        price: product.price || null,
+        mission: mission,
+      }),
+    });
+  } catch (err) {
+    console.warn("Failed to save purchase:", err);
+  }
+};
+
+/**
+ * POST /memory/interaction
+ * Save a product interaction (selected/removed/added)
+ */
+export const saveInteraction = async (userId, action, product, mission = null) => {
+  try {
+    await fetch(`${API_BASE}/memory/interaction`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: userId,
+        action,
+        product_name: product.name,
+        category: product.category || null,
+        brand: product.brand || product.seller || null,
+        mission: mission,
+      }),
+    });
+  } catch (err) {
+    console.warn("Failed to save interaction:", err);
+  }
 };

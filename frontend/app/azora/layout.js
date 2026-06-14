@@ -1,12 +1,17 @@
+"use client";
+
 import Navbar from "../components/Navbar";
+import AuthGuard from "../components/AuthGuard";
 
 export default function AzoraLayout({ children }) {
   return (
-    <div className="min-h-screen flex flex-col bg-[#0F172A] text-[#FFFFFF]">
-      <Navbar />
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
-        {children}
-      </main>
-    </div>
+    <AuthGuard>
+      <div className="min-h-screen flex flex-col bg-[#0F172A] text-[#FFFFFF]">
+        <Navbar />
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col">
+          {children}
+        </main>
+      </div>
+    </AuthGuard>
   );
 }

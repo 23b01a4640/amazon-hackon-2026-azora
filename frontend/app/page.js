@@ -1,12 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, MapPin, ShoppingCart, ChevronDown, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { supabase } from "./lib/supabase";
 
 export default function AmazonHomePage() {
   const router = useRouter();
   const [showAzoraTooltip, setShowAzoraTooltip] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/login");
+      } else {
+        setCheckingAuth(false);
+      }
+    };
+    checkSession();
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-[#131921] flex items-center justify-center">
+        <div className="text-[#FF9900] text-xl font-bold animate-pulse">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#EAEDED] flex flex-col">

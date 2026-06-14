@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getProductsByMission } from "../../../services/api";
+import { getProductsByMission, saveInteraction } from "../../../services/api";
+import { supabase } from "../../../lib/supabase";
 import ProductCard from "../../../components/ProductCard";
 import TrustLayer from "../../../components/TrustLayer";
 import LoadingOverlay from "../../../components/LoadingOverlay";
@@ -34,7 +35,9 @@ export default function BundleDetailsPage({ params }) {
     }
   }, [bundleId, router]);
 
-  const handleRemoveProduct = (productId) => {
+  const handleRemoveProduct = async (productId) => {
+    const removedProduct = bundle.products.find((p) => p.id === productId);
+    
     setBundle((prev) => {
       const updatedProducts = prev.products.filter((p) => p.id !== productId);
       const updatedBundle = {
@@ -46,6 +49,19 @@ export default function BundleDetailsPage({ params }) {
       localStorage.setItem("selectedBundleDetail", JSON.stringify(updatedBundle));
       return updatedBundle;
     });
+
+    // Track removal in memory
+    if (removedProduct) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const mission = localStorage.getItem("currentMission") || null;
+          await saveInteraction(session.user.id, "removed", removedProduct, mission);
+        }
+      } catch (err) {
+        console.warn("Failed to track removal:", err);
+      }
+    }
   };
 
   const handleAddProduct = async () => {
@@ -67,7 +83,7 @@ export default function BundleDetailsPage({ params }) {
     }
   };
 
-  const handleSelectProduct = (product) => {
+  const handleSelectProduct = async (product) => {
     setBundle((prev) => {
       const updatedProducts = [...prev.products, product];
       const updatedBundle = {
@@ -81,6 +97,17 @@ export default function BundleDetailsPage({ params }) {
     });
     setMissionProducts((prev) => prev.filter((p) => p.id !== product.id));
     setShowAddProduct(false);
+
+    // Track addition in memory
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const mission = localStorage.getItem("currentMission") || null;
+        await saveInteraction(session.user.id, "added", product, mission);
+      }
+    } catch (err) {
+      console.warn("Failed to track addition:", err);
+    }
   };
 
   const handleCheckout = () => {
