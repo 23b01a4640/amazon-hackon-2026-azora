@@ -1,11 +1,5 @@
 <h1 align="center">✨ Azora — Amazon Mission Control</h1>
 
-<p align="center">
-  <img src="https://img.shields.io/github/stars/yourusername/amazon-hackon-2026-azora?style=social">
-  <img src="https://img.shields.io/github/forks/yourusername/amazon-hackon-2026-azora?style=social">
-  <img src="https://img.shields.io/github/license/yourusername/amazon-hackon-2026-azora">
-</p>
-
 ---
 
 ## 📌 Description
