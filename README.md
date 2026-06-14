@@ -1,46 +1,46 @@
-<h1 align="center">✨ Azora — Amazon Mission Control</h1>
+<h1 align="center">Azora - Amazon Goal Control</h1>
 
 ---
 
-## 📌 Description
+## Description
 
-🌟 **Azora** is an AI-powered goal-based shopping assistant that integrates with Amazon to help users shop by *mission* instead of searching for products one by one.
+**Azora** is an AI-powered goal-based shopping assistant that integrates with Amazon to help users shop by *goal* instead of searching for products one by one.
 
-💡 Instead of asking "What product do you want?", Azora asks "What are you trying to achieve?" — then generates personalized product bundles using AI, adaptive questioning, and persistent customer memory.
+Instead of asking "What product do you want?", Azora asks "What are you trying to achieve?" - then generates personalized product bundles using AI, adaptive questioning, and persistent customer memory.
 
-🎯 Built for the **Amazon HackOn 2026** hackathon.
-
----
-
-## 🚀 Features
-
-✔️ **Mission-Based Shopping** – Users describe a goal (e.g., "Moving into a new apartment") and Azora generates complete product bundles (Essentials, Best Value, Premium)
-
-✔️ **AI Mission Understanding** – Groq LLM classifies user queries into missions or direct product searches with natural language understanding
-
-✔️ **Adaptive Questions** – AI generates contextual clarifying questions with relevant options specific to each product type
-
-✔️ **Smart Product Search** – Budget-aware, preference-filtered product search with relevance ranking
-
-✔️ **Image-Based Discovery** – Upload a photo and Groq Vision identifies products, returning matching items from the catalog
-
-✔️ **Bundle Customization** – Add/remove products from bundles with real-time price recalculation
-
-✔️ **Persistent Customer Memory** – System remembers past purchases, removed products, budget preferences, and brand preferences across sessions
-
-✔️ **Personalized Recommendations** – Returning users get bundles that exclude previously purchased items and prioritize preferred brands
-
-✔️ **Amazon Integration** – Seamless flow from Azora bundles → Amazon-style cart page with Azora icon for quick access
-
-✔️ **Authentication** – Amazon-themed login/signup using Supabase Auth with session persistence
-
-✔️ **Search History** – Recent searches displayed on homepage for quick re-access
-
-📌 *Two modes: Mission-based shopping (bundles) and Direct product search (individual items with adaptive filtering)*
+Built for the **Amazon HackOn 2026** hackathon.
 
 ---
 
-## 🏗️ Architecture
+## Features
+
+- **Goal-Based Shopping** - Users describe a goal (e.g., "Moving into a new apartment") and Azora generates complete product bundles (Essentials, Best Value, Premium)
+
+- **AI Goal Understanding** - Groq LLM classifies user queries into goals or direct product searches with natural language understanding
+
+- **Adaptive Questions** - AI generates contextual clarifying questions with relevant options specific to each product type
+
+- **Smart Product Search** - Budget-aware, preference-filtered product search with relevance ranking
+
+- **Image-Based Discovery** - Upload a photo and Groq Vision identifies products, returning matching items from the catalog
+
+- **Bundle Customization** - Add/remove products from bundles with real-time price recalculation
+
+- **Persistent Customer Memory** - System remembers past purchases, removed products, budget preferences, and brand preferences across sessions
+
+- **Personalized Recommendations** - Returning users get bundles that exclude previously purchased items and prioritize preferred brands
+
+- **Amazon Integration** - Seamless flow from Azora bundles to Amazon-style cart page with Azora icon for quick access
+
+- **Authentication** - Amazon-themed login/signup using Supabase Auth with session persistence
+
+- **Search History** - Recent searches displayed on homepage for quick re-access
+
+*Two modes: Goal-based shopping (bundles) and Direct product search (individual items with adaptive filtering)*
+
+---
+
+## Architecture
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
@@ -56,7 +56,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
@@ -68,7 +68,7 @@
 
 ---
 
-## 🦾 Installation
+## Installation
 
 ```bash
 # Clone the repository
@@ -122,7 +122,7 @@ npm run dev
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 amazon-hackon-2026-azora/
@@ -134,8 +134,8 @@ amazon-hackon-2026-azora/
 │   │   ├── groq_service.py        # Groq LLM integration
 │   │   └── memory_service.py      # User memory & personalization
 │   ├── routes/
-│   │   ├── understand.py          # POST /understand (mission classification)
-│   │   ├── questions.py           # POST /questions (mission questions)
+│   │   ├── understand.py          # POST /understand (goal classification)
+│   │   ├── questions.py           # POST /questions (goal questions)
 │   │   ├── adaptive_questions.py  # POST /adaptive-questions (AI-generated)
 │   │   ├── bundles.py             # GET /bundles/{mission} (personalized)
 │   │   ├── products.py            # GET /products/search
@@ -164,58 +164,58 @@ amazon-hackon-2026-azora/
 
 ---
 
-## 🔄 User Flow
+## User Flow
 
 ```
-Login/Signup → Amazon Homepage → Click Azora Icon
-       ↓
+Login/Signup - Amazon Homepage - Click Azora Icon
+       |
 Azora Homepage (Search by text, image, or goal cards)
-       ↓
+       |
 ┌──────────────────────────────────────────┐
-│  Mission Flow          │  Product Flow   │
+│  Goal Flow             │  Product Flow   │
 │  "New Apartment"       │  "Running Shoes"│
-│       ↓                │       ↓         │
-│  Mission Questions     │  Adaptive Q's   │
-│       ↓                │       ↓         │
+│       |                │       |         │
+│  Goal Questions        │  Adaptive Q's   │
+│       |                │       |         │
 │  Personalized Bundles  │  Filtered Results│
 │  (Essentials/Best/     │  (Budget+Type)  │
-│   Premium)             │       ↓         │
-│       ↓                │  Add to Cart    │
+│   Premium)             │       |         │
+│       |                │  Add to Cart    │
 │  Customize Bundle      │                 │
-│       ↓                │                 │
+│       |                │                 │
 │  Checkout              │                 │
 └──────────┬─────────────┴─────────────────┘
-           ↓
+           |
     Amazon Cart Page
 ```
 
 ---
 
-## 🧠 AI-Powered Features
+## AI-Powered Features
 
 | Feature | Model | Purpose |
 |---------|-------|---------|
-| Mission Classification | Llama 3.1 8B | Understand user intent from natural language |
+| Goal Classification | Llama 3.1 8B | Understand user intent from natural language |
 | Adaptive Questions | Llama 3.1 8B | Generate contextual questions with options |
 | Image Search | Llama 4 Scout 17B | Identify products from uploaded photos |
 | Personalization | Memory Service | Exclude purchased items, prefer brands |
 
 ---
 
-## 🗄️ Database Tables
+## Database Tables
 
 | Table | Purpose |
 |-------|---------|
-| `products` | 65+ products across 5 missions |
-| `search_history` | User search queries & detected missions |
+| `products` | 120+ products across 5 goals |
+| `search_history` | User search queries & detected goals |
 | `user_purchases` | Purchase history for personalization |
 | `user_interactions` | Product add/remove tracking |
-| `mission_templates` | Mission definitions |
+| `mission_templates` | Goal definitions |
 | `category_priorities` | Category priority info |
 
 ---
 
-## 🌐 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -232,12 +232,12 @@ Azora Homepage (Search by text, image, or goal cards)
 
 ---
 
-## 👥 Team
+## Team
 
 Built by **Team Azora** for Amazon HackOn 2026.
 
 ---
 
-## 📄 License
+## License
 
 This project is built for hackathon demonstration purposes.

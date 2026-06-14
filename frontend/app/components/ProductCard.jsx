@@ -18,7 +18,7 @@ export default function ProductCard({ product }) {
         <img 
           src={imageUrl} 
           alt={name} 
-          className="object-cover w-full h-full rounded transition-transform duration-300 group-hover:scale-105" 
+          className="object-cover w-full h-full rounded transition-transform duration-300 group-hover:scale-105"
         />
       </div>
 
