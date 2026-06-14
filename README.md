@@ -234,7 +234,7 @@ Azora Homepage (Search by text, image, or goal cards)
 
 ## Team
 
-Built by **Team Azora** for Amazon HackOn 2026.
+Built by **Team Syntax Sirens** for Amazon HackOn 2026.
 
 ---
 
