@@ -84,15 +84,18 @@ export const searchProducts = async (query) => {
 
 /**
  * POST /products/smart-search
- * Sends query + user answers, returns filtered & ranked products
+ * Sends query + user answers + user_id, returns filtered & ranked products
  * Falls back to regular search if smart-search fails
  */
-export const smartSearchProducts = async (query, answers = []) => {
+export const smartSearchProducts = async (query, answers = [], userId = null) => {
   try {
+    const body = { query, answers };
+    if (userId) body.user_id = userId;
+    
     const response = await fetch(`${API_BASE}/products/smart-search`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, answers }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) throw new Error("Smart search failed");
@@ -108,11 +111,14 @@ export const smartSearchProducts = async (query, answers = []) => {
 
 /**
  * POST /image-search
- * Sends an image file, returns { mission, detected_categories, products }
+ * Sends an image file + optional text query, returns { mission, intent, detected_product, detected_category, detected_categories, products }
  */
-export const imageSearch = async (imageFile) => {
+export const imageSearch = async (imageFile, query = null) => {
   const formData = new FormData();
   formData.append("image", imageFile);
+  if (query && query.trim()) {
+    formData.append("query", query.trim());
+  }
 
   const response = await fetch(`${API_BASE}/image-search`, {
     method: "POST",

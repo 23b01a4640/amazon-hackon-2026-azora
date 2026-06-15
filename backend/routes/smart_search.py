@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from database.supabase_client import supabase
 from services.groq_service import client as groq_client
+from services.memory_service import get_user_memory
 import re
 import json
 
@@ -12,6 +13,7 @@ router = APIRouter()
 class SmartSearchRequest(BaseModel):
     query: str
     answers: Optional[List[str]] = []
+    user_id: Optional[str] = None
 
 
 def extract_budget(answers: List[str]) -> Optional[int]:
@@ -193,4 +195,17 @@ def smart_search(request: SmartSearchRequest):
         all_products.sort(key=lambda p: (-p.get("rating", 0), p.get("price", 0)))
 
     # Return top results (max 10)
+    # Apply repurchase-aware filtering if user_id is provided
+    if request.user_id:
+        memory = get_user_memory(request.user_id)
+        non_repurchasable = set(p.lower() for p in memory.get("non_repurchasable_purchases", []))
+        removed = set(p.lower() for p in memory.get("removed_products", []))
+        exclude = non_repurchasable | removed
+
+        if exclude:
+            filtered = [p for p in all_products if p["name"].lower() not in exclude]
+            # Only apply if we still have results
+            if filtered:
+                all_products = filtered
+
     return all_products[:10]

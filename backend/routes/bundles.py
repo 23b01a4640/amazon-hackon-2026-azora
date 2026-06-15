@@ -8,10 +8,16 @@ router = APIRouter()
 
 
 def personalize_bundle(products: list, memory: dict) -> list:
-    """Remove already-purchased and disliked products from a bundle."""
-    past = set(p.lower() for p in memory.get("past_purchases", []))
+    """Remove only non-repurchasable purchased products and disliked products from a bundle.
+    
+    Repurchasable products (skincare, personal care, etc.) remain eligible
+    even if previously purchased. Non-repurchasable products (clothing, 
+    electronics, furniture, etc.) are excluded if already purchased.
+    """
+    # Only exclude non-repurchasable past purchases (not consumables like sunscreen)
+    non_repurchasable = set(p.lower() for p in memory.get("non_repurchasable_purchases", []))
     removed = set(p.lower() for p in memory.get("removed_products", []))
-    exclude = past | removed
+    exclude = non_repurchasable | removed
 
     filtered = [p for p in products if p["name"].lower() not in exclude]
 

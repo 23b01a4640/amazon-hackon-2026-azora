@@ -52,12 +52,12 @@ export default function SearchBox({ value, onChange }) {
     setIsSubmitting(true);
 
     try {
-      // If image is uploaded, use image search
+      // If image is uploaded, use image search with optional text query
       if (selectedFile) {
         setLoadingMessage("🔍 Analyzing your image...");
-        const result = await imageSearch(selectedFile);
+        const result = await imageSearch(selectedFile, value.trim() || null);
         localStorage.setItem("imageSearchResults", JSON.stringify(result));
-        await saveToHistory("Image search", result.mission || "Unknown", "image");
+        await saveToHistory(value.trim() || "Image search", result.mission || "Unknown", "image");
         router.push("/azora/bundles?mode=image");
         return;
       }
@@ -105,7 +105,7 @@ export default function SearchBox({ value, onChange }) {
             <Search className="text-gray-400 ml-2 hidden sm:block" size={24} />
             <input
               type="text"
-              placeholder="What is your goal today? (e.g. Moving into a new apartment)"
+              placeholder={selectedFile ? "Describe what you're looking for (e.g. Find similar, Suggest pants for this)" : "What is your goal today? (e.g. Moving into a new apartment)"}
               value={value}
               onChange={(e) => onChange(e.target.value)}
               className="flex-1 bg-transparent text-white sm:text-lg px-4 py-3 outline-none placeholder:text-gray-500"

@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, MapPin, ShoppingCart, ChevronDown, Sparkles, Trash2, Plus, Minus, CheckCircle } from "lucide-react";
+import { savePurchase } from "../services/api";
+import { supabase } from "../lib/supabase";
 
 export default function AmazonCartPage() {
   const router = useRouter();
@@ -67,6 +69,25 @@ export default function AmazonCartPage() {
   const handleQuantityChange = (productId, newQty) => {
     if (newQty < 1) return;
     setQuantities((prev) => ({ ...prev, [productId]: newQty }));
+  };
+
+  const handleProceedToBuy = async () => {
+    if (checkedCount === 0) return;
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const mission = localStorage.getItem("currentMission") || null;
+        // Only save checked items as purchases
+        for (const product of checkedCartItems) {
+          await savePurchase(session.user.id, product, mission);
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to save purchase history:", err);
+    }
+
+    alert(`Order placed for ${checkedCount} item${checkedCount !== 1 ? "s" : ""}! Total: ₹${subtotal.toLocaleString()}`);
   };
 
   return (
@@ -319,8 +340,12 @@ export default function AmazonCartPage() {
             </label>
 
             {/* Proceed to Buy */}
-            <button className="w-full py-2.5 bg-[#FFD814] hover:bg-[#F7CA00] text-sm font-medium text-[#131921] rounded-full shadow-sm border border-[#FCD200] transition-colors">
-              Proceed to Buy
+            <button 
+              onClick={handleProceedToBuy}
+              disabled={checkedCount === 0}
+              className="w-full py-2.5 bg-[#FFD814] hover:bg-[#F7CA00] disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium text-[#131921] rounded-full shadow-sm border border-[#FCD200] transition-colors"
+            >
+              Proceed to Buy ({checkedCount} item{checkedCount !== 1 ? "s" : ""})
             </button>
 
             {/* Prime banner */}

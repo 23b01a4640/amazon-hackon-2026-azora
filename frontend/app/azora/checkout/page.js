@@ -30,18 +30,8 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
     setLoadingMessage("🛒 Adding products to cart...");
 
-    // Save all products as purchases
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user && bundle?.products) {
-        const mission = localStorage.getItem("currentMission") || null;
-        for (const product of bundle.products) {
-          await savePurchase(session.user.id, product, mission);
-        }
-      }
-    } catch (err) {
-      console.warn("Failed to save purchase history:", err);
-    }
+    // Don't save purchases here - they will be saved on the Amazon cart page
+    // when user clicks "Proceed to Buy" for only the checked items
 
     setTimeout(() => {
       router.push("/amazon");

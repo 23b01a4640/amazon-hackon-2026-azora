@@ -36,7 +36,10 @@ function BundlesContent() {
           // Get user answers from localStorage (set by questions page)
           const savedAnswers = localStorage.getItem("userAnswers");
           const answers = savedAnswers ? JSON.parse(savedAnswers) : [];
-          const products = await smartSearchProducts(query, answers);
+          // Get user_id for repurchase-aware filtering
+          const { data: { session } } = await supabase.auth.getSession();
+          const userId = session?.user?.id || null;
+          const products = await smartSearchProducts(query, answers, userId);
           setSearchResults(products);
         } else if (mission) {
           // Get user_id for personalized bundles
@@ -119,11 +122,17 @@ function BundlesContent() {
       <div className="flex flex-col w-full min-h-[calc(100vh-72px)] bg-[#0F172A] pb-12 pt-8">
         <div className="text-center mb-8 px-4">
           <h1 className="text-2xl md:text-3xl font-bold text-[#00A8E1] mb-4 flex items-center justify-center gap-3">
-            Image Search Results
+            {imageResults.intent === "similar" && "Similar Products"}
+            {imageResults.intent === "complementary" && "Complementary Products"}
+            {imageResults.intent === "bundle" && "Recommended Bundle"}
+            {!imageResults.intent && "Image Search Results"}
           </h1>
-          {imageResults.mission && imageResults.mission !== "Unknown" && (
+          {imageResults.detected_product && (
             <p className="text-lg text-gray-300 mb-2">
-              Detected Mission: <span className="text-[#FF9900] font-bold">{imageResults.mission}</span>
+              Detected: <span className="text-[#FF9900] font-bold">{imageResults.detected_product}</span>
+              {imageResults.target_category && (
+                <span className="text-gray-400"> → Looking for: <span className="text-[#00A8E1] font-bold">{imageResults.target_category}</span></span>
+              )}
             </p>
           )}
           {imageResults.detected_categories && imageResults.detected_categories.length > 0 && (

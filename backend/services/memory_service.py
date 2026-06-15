@@ -2,10 +2,45 @@ from database.supabase_client import supabase
 from typing import Optional
 
 
+# Category classification for repurchase-aware recommendations
+REPURCHASABLE_CATEGORIES = [
+    "Skincare",
+    "Fitness Nutrition",
+    "Personal Care",
+    "Grocery",
+]
+
+NON_REPURCHASABLE_CATEGORIES = [
+    "Clothing",
+    "Electronics",
+    "Furniture",
+    "Backpack",
+    "Monitor",
+    "Study Essentials",
+    "Computer Accessories",
+    "Laptop Accessories",
+    "Storage",
+    "Home Decor",
+]
+
+
+def is_repurchasable_category(category: str) -> bool:
+    """Check if a product category is repurchasable (consumable/recurring)."""
+    if not category:
+        return False
+    category_lower = category.lower()
+    for repurchasable in REPURCHASABLE_CATEGORIES:
+        if repurchasable.lower() in category_lower or category_lower in repurchasable.lower():
+            return True
+    return False
+
+
 def get_user_memory(user_id: str) -> dict:
     """Fetch and summarize a user's complete shopping memory."""
     memory = {
         "past_purchases": [],
+        "past_purchases_with_category": [],
+        "non_repurchasable_purchases": [],
         "removed_products": [],
         "budget_preference": "unknown",
         "preferred_brands": [],
@@ -37,15 +72,28 @@ def get_user_memory(user_id: str) -> dict:
     )
     interactions = interactions_resp.data or []
 
-    # Past purchases — product names
+    # Past purchases - all product names
     memory["past_purchases"] = [p["product_name"] for p in purchases]
+
+    # Past purchases with category info
+    memory["past_purchases_with_category"] = [
+        {"name": p["product_name"], "category": p.get("category", "")}
+        for p in purchases
+    ]
+
+    # Non-repurchasable purchases - only these should be excluded from recommendations
+    memory["non_repurchasable_purchases"] = [
+        p["product_name"]
+        for p in purchases
+        if not is_repurchasable_category(p.get("category", ""))
+    ]
 
     # Removed products
     memory["removed_products"] = [
         i["product_name"] for i in interactions if i["action"] == "removed"
     ]
 
-    # Budget preference — analyze average purchase price
+    # Budget preference - analyze average purchase price
     if purchases:
         prices = [p["price"] for p in purchases if p.get("price")]
         if prices:
@@ -57,7 +105,7 @@ def get_user_memory(user_id: str) -> dict:
             else:
                 memory["budget_preference"] = "premium"
 
-    # Preferred brands — most frequently purchased
+    # Preferred brands - most frequently purchased
     if purchases:
         brand_count = {}
         for p in purchases:
