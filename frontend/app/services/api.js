@@ -1,4 +1,12 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+if (typeof window !== "undefined") {
+  console.log("[Azora] API_BASE:", API_BASE);
+}
+
+if (!process.env.NEXT_PUBLIC_API_URL) {
+  console.error("NEXT_PUBLIC_API_URL is not configured. API requests will fall back to localhost.");
+}
 
 /**
  * POST /understand
