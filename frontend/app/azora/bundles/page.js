@@ -21,6 +21,7 @@ function BundlesContent() {
   const [searchResults, setSearchResults] = useState([]);
   const [imageResults, setImageResults] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedProducts, setSelectedProducts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,6 +66,27 @@ function BundlesContent() {
 
   // Image search results view
   if (mode === "image" && imageResults) {
+    const imageProducts = imageResults.products || [];
+    const isAllImageSelected = imageProducts.length > 0 && selectedProducts.length === imageProducts.length;
+
+    const toggleSelectProduct = (product) => {
+      setSelectedProducts((prev) => {
+        const exists = prev.find((p) => p.id === product.id);
+        if (exists) {
+          return prev.filter((p) => p.id !== product.id);
+        }
+        return [...prev, product];
+      });
+    };
+
+    const toggleSelectAll = () => {
+      if (isAllImageSelected) {
+        setSelectedProducts([]);
+      } else {
+        setSelectedProducts([...imageProducts]);
+      }
+    };
+
     const handleAddToCart = (product) => {
       const bundle = {
         id: "image-search",
@@ -78,11 +100,26 @@ function BundlesContent() {
       router.push("/amazon");
     };
 
+    const handleAddSelectedToCart = () => {
+      if (selectedProducts.length === 0) return;
+      const totalPrice = selectedProducts.reduce((sum, p) => sum + p.price, 0);
+      const bundle = {
+        id: "image-search",
+        name: "Selected Products",
+        description: "Products from image search",
+        products: selectedProducts,
+        price: totalPrice,
+        productCount: selectedProducts.length,
+      };
+      localStorage.setItem("selectedBundle", JSON.stringify(bundle));
+      router.push("/amazon");
+    };
+
     return (
       <div className="flex flex-col w-full min-h-[calc(100vh-72px)] bg-[#0F172A] pb-12 pt-8">
         <div className="text-center mb-8 px-4">
           <h1 className="text-2xl md:text-3xl font-bold text-[#00A8E1] mb-4 flex items-center justify-center gap-3">
-            📷 Image Search Results
+            Image Search Results
           </h1>
           {imageResults.mission && imageResults.mission !== "Unknown" && (
             <p className="text-lg text-gray-300 mb-2">
@@ -99,25 +136,78 @@ function BundlesContent() {
             </div>
           )}
           <p className="text-gray-400 mt-4">
-            {imageResults.products?.length || 0} product{imageResults.products?.length !== 1 ? "s" : ""} found
+            {imageProducts.length} product{imageProducts.length !== 1 ? "s" : ""} found
           </p>
         </div>
 
         <div className="w-full max-w-5xl mx-auto px-4">
-          {imageResults.products && imageResults.products.length > 0 ? (
-            <div className="space-y-4">
-              {imageResults.products.map((product) => (
-                <div key={product.id} className="relative">
-                  <ProductCard product={product} />
+          {imageProducts.length > 0 ? (
+            <>
+              {/* Select All + Add Selected Bar */}
+              <div className="flex items-center justify-between mb-4 p-4 bg-[#1E293B] border border-[#334155] rounded-xl">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isAllImageSelected}
+                    onChange={toggleSelectAll}
+                    className="w-5 h-5 accent-[#FF9900] cursor-pointer rounded"
+                  />
+                  <span className="text-white font-medium text-sm">
+                    Select All ({imageProducts.length})
+                  </span>
+                </label>
+                {selectedProducts.length > 0 && (
                   <button
-                    onClick={() => handleAddToCart(product)}
-                    className="absolute top-4 right-4 px-4 py-2 bg-[#FF9900] hover:bg-[#e68a00] text-[#111827] font-bold rounded-lg text-sm transition-colors shadow-lg"
+                    onClick={handleAddSelectedToCart}
+                    className="px-5 py-2.5 bg-[#FF9900] hover:bg-[#e68a00] text-[#111827] font-bold rounded-lg text-sm transition-colors shadow-lg flex items-center gap-2"
                   >
-                    Add to Cart
+                    Add {selectedProducts.length} to Cart - ₹{selectedProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()}
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {imageProducts.map((product) => {
+                  const isSelected = selectedProducts.some((p) => p.id === product.id);
+                  return (
+                    <div key={product.id} className={`relative flex items-start gap-3 p-3 rounded-xl border transition-colors ${isSelected ? "border-[#FF9900] bg-[#FF9900]/5" : "border-transparent"}`}>
+                      <div className="flex items-center pt-12">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectProduct(product)}
+                          className="w-5 h-5 accent-[#FF9900] cursor-pointer rounded"
+                        />
+                      </div>
+                      <div className="flex-1 relative">
+                        <ProductCard product={product} />
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="absolute top-4 right-4 px-4 py-2 bg-[#FF9900] hover:bg-[#e68a00] text-[#111827] font-bold rounded-lg text-sm transition-colors shadow-lg"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Sticky bottom bar when items are selected */}
+              {selectedProducts.length > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 bg-[#1E293B] border-t border-[#334155] p-4 flex items-center justify-between z-50 shadow-2xl">
+                  <span className="text-white font-medium">
+                    {selectedProducts.length} product{selectedProducts.length !== 1 ? "s" : ""} selected - Total: <span className="text-[#FF9900] font-bold">₹{selectedProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()}</span>
+                  </span>
+                  <button
+                    onClick={handleAddSelectedToCart}
+                    className="px-6 py-3 bg-[#FF9900] hover:bg-[#e68a00] text-[#111827] font-bold rounded-lg text-sm transition-colors shadow-lg"
+                  >
+                    Add Selected to Cart
                   </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className="text-center text-gray-400 py-16">
               <p className="text-xl mb-2">No products found</p>
@@ -130,6 +220,26 @@ function BundlesContent() {
   }
 
   if (mode === "search") {
+    const isAllSelected = searchResults.length > 0 && selectedProducts.length === searchResults.length;
+
+    const toggleSelectProduct = (product) => {
+      setSelectedProducts((prev) => {
+        const exists = prev.find((p) => p.id === product.id);
+        if (exists) {
+          return prev.filter((p) => p.id !== product.id);
+        }
+        return [...prev, product];
+      });
+    };
+
+    const toggleSelectAll = () => {
+      if (isAllSelected) {
+        setSelectedProducts([]);
+      } else {
+        setSelectedProducts([...searchResults]);
+      }
+    };
+
     const handleAddToCart = (product) => {
       const bundle = {
         id: "direct-search",
@@ -143,9 +253,24 @@ function BundlesContent() {
       router.push("/amazon");
     };
 
+    const handleAddSelectedToCart = () => {
+      if (selectedProducts.length === 0) return;
+      const totalPrice = selectedProducts.reduce((sum, p) => sum + p.price, 0);
+      const bundle = {
+        id: "direct-search",
+        name: "Selected Products",
+        description: "Products from your search",
+        products: selectedProducts,
+        price: totalPrice,
+        productCount: selectedProducts.length,
+      };
+      localStorage.setItem("selectedBundle", JSON.stringify(bundle));
+      router.push("/amazon");
+    };
+
     return (
       <div className="flex flex-col w-full min-h-[calc(100vh-72px)] bg-[#0F172A] pb-12 pt-8">
-        <div className="text-center mb-16 px-4">
+        <div className="text-center mb-8 px-4">
           <h1 className="text-2xl md:text-3xl font-bold text-[#00A8E1] mb-4 flex items-center justify-center gap-3">
             <Search className="text-[#00A8E1]" size={32} /> Results for &quot;{query}&quot;
           </h1>
@@ -156,19 +281,74 @@ function BundlesContent() {
 
         <div className="w-full max-w-5xl mx-auto px-4">
           {searchResults.length > 0 ? (
-            <div className="space-y-4">
-              {searchResults.map((product) => (
-                <div key={product.id} className="relative">
-                  <ProductCard product={product} />
+            <>
+              {/* Select All + Add Selected Bar */}
+              <div className="flex items-center justify-between mb-4 p-4 bg-[#1E293B] border border-[#334155] rounded-xl">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={toggleSelectAll}
+                    className="w-5 h-5 accent-[#FF9900] cursor-pointer rounded"
+                  />
+                  <span className="text-white font-medium text-sm">
+                    Select All ({searchResults.length})
+                  </span>
+                </label>
+                {selectedProducts.length > 0 && (
                   <button
-                    onClick={() => handleAddToCart(product)}
-                    className="absolute top-4 right-4 px-4 py-2 bg-[#FF9900] hover:bg-[#e68a00] text-[#111827] font-bold rounded-lg text-sm transition-colors shadow-lg"
+                    onClick={handleAddSelectedToCart}
+                    className="px-5 py-2.5 bg-[#FF9900] hover:bg-[#e68a00] text-[#111827] font-bold rounded-lg text-sm transition-colors shadow-lg flex items-center gap-2"
                   >
-                    Add to Cart
+                    Add {selectedProducts.length} to Cart - ₹{selectedProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()}
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                {searchResults.map((product) => {
+                  const isSelected = selectedProducts.some((p) => p.id === product.id);
+                  return (
+                    <div key={product.id} className={`relative flex items-start gap-3 p-3 rounded-xl border transition-colors ${isSelected ? "border-[#FF9900] bg-[#FF9900]/5" : "border-transparent"}`}>
+                      {/* Checkbox */}
+                      <div className="flex items-center pt-12">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectProduct(product)}
+                          className="w-5 h-5 accent-[#FF9900] cursor-pointer rounded"
+                        />
+                      </div>
+                      {/* Product Card */}
+                      <div className="flex-1 relative">
+                        <ProductCard product={product} />
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          className="absolute top-4 right-4 px-4 py-2 bg-[#FF9900] hover:bg-[#e68a00] text-[#111827] font-bold rounded-lg text-sm transition-colors shadow-lg"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Sticky bottom bar when items are selected */}
+              {selectedProducts.length > 0 && (
+                <div className="fixed bottom-0 left-0 right-0 bg-[#1E293B] border-t border-[#334155] p-4 flex items-center justify-between z-50 shadow-2xl">
+                  <span className="text-white font-medium">
+                    {selectedProducts.length} product{selectedProducts.length !== 1 ? "s" : ""} selected - Total: <span className="text-[#FF9900] font-bold">₹{selectedProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()}</span>
+                  </span>
+                  <button
+                    onClick={handleAddSelectedToCart}
+                    className="px-6 py-3 bg-[#FF9900] hover:bg-[#e68a00] text-[#111827] font-bold rounded-lg text-sm transition-colors shadow-lg"
+                  >
+                    Add Selected to Cart
                   </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className="text-center text-gray-400 py-16">
               <p className="text-xl mb-2">No products found</p>

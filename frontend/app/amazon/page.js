@@ -9,6 +9,7 @@ export default function AmazonCartPage() {
   const [showAzoraTooltip, setShowAzoraTooltip] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [quantities, setQuantities] = useState({});
+  const [checkedItems, setCheckedItems] = useState({});
 
   useEffect(() => {
     const saved = localStorage.getItem("selectedBundle");
@@ -16,19 +17,47 @@ export default function AmazonCartPage() {
       const bundle = JSON.parse(saved);
       const products = bundle.products || [];
       setCartItems(products);
-      // Initialize all quantities to 1
+      // Initialize all quantities to 1 and all items checked
       const initialQty = {};
-      products.forEach((p) => { initialQty[p.id] = 1; });
+      const initialChecked = {};
+      products.forEach((p) => { 
+        initialQty[p.id] = 1; 
+        initialChecked[p.id] = true;
+      });
       setQuantities(initialQty);
+      setCheckedItems(initialChecked);
     }
   }, []);
 
+  const checkedCartItems = cartItems.filter((item) => checkedItems[item.id]);
   const cartCount = cartItems.length;
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * (quantities[item.id] || 1), 0);
+  const subtotal = checkedCartItems.reduce((sum, item) => sum + item.price * (quantities[item.id] || 1), 0);
+  const checkedCount = checkedCartItems.length;
+
+  const handleToggleCheck = (productId) => {
+    setCheckedItems((prev) => ({ ...prev, [productId]: !prev[productId] }));
+  };
+
+  const handleDeselectAll = () => {
+    const updated = {};
+    cartItems.forEach((p) => { updated[p.id] = false; });
+    setCheckedItems(updated);
+  };
+
+  const handleSelectAll = () => {
+    const updated = {};
+    cartItems.forEach((p) => { updated[p.id] = true; });
+    setCheckedItems(updated);
+  };
 
   const handleRemove = (productId) => {
     setCartItems((prev) => prev.filter((p) => p.id !== productId));
     setQuantities((prev) => {
+      const updated = { ...prev };
+      delete updated[productId];
+      return updated;
+    });
+    setCheckedItems((prev) => {
       const updated = { ...prev };
       delete updated[productId];
       return updated;
@@ -161,7 +190,9 @@ export default function AmazonCartPage() {
         <div className="flex-1">
           <div className="bg-white p-6 rounded shadow-sm">
             <h1 className="text-2xl md:text-3xl font-bold text-[#131921] mb-1">Shopping Cart</h1>
-            <a href="#" className="text-sm text-[#007185] hover:text-[#C7511F] hover:underline">Deselect all items</a>
+            <button onClick={checkedCount === cartItems.length ? handleDeselectAll : handleSelectAll} className="text-sm text-[#007185] hover:text-[#C7511F] hover:underline bg-transparent border-none cursor-pointer">
+              {checkedCount === cartItems.length ? "Deselect all items" : "Select all items"}
+            </button>
             
             <div className="border-b border-gray-200 mt-4 mb-2"></div>
             <div className="text-right text-sm text-gray-500 mb-2">Price</div>
@@ -184,7 +215,12 @@ export default function AmazonCartPage() {
                     <div key={product.id} className="flex gap-4 py-5">
                       {/* Checkbox */}
                       <div className="flex items-start pt-2">
-                        <input type="checkbox" defaultChecked className="w-5 h-5 accent-[#008296] cursor-pointer" />
+                        <input 
+                          type="checkbox" 
+                          checked={checkedItems[product.id] || false} 
+                          onChange={() => handleToggleCheck(product.id)}
+                          className="w-5 h-5 accent-[#008296] cursor-pointer" 
+                        />
                       </div>
 
                       {/* Product Image */}
@@ -240,7 +276,7 @@ export default function AmazonCartPage() {
             {cartItems.length > 0 && (
               <div className="text-right pt-4 border-t border-gray-200 mt-2">
                 <span className="text-lg text-[#131921]">
-                  Subtotal ({cartItems.length} item{cartItems.length !== 1 ? "s" : ""}): 
+                  Subtotal ({checkedCount} item{checkedCount !== 1 ? "s" : ""}): 
                   <span className="font-bold"> ₹{subtotal.toLocaleString()}</span>
                 </span>
               </div>
@@ -272,7 +308,7 @@ export default function AmazonCartPage() {
 
             {/* Subtotal */}
             <p className="text-base text-[#131921] mb-4">
-              Subtotal ({cartItems.length} item{cartItems.length !== 1 ? "s" : ""}): 
+              Subtotal ({checkedCount} item{checkedCount !== 1 ? "s" : ""}): 
               <span className="font-bold"> ₹{subtotal.toLocaleString()}</span>
             </p>
 
