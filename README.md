@@ -2,6 +2,12 @@
 
 ---
 
+## Live Link
+
+[https://amazon-hackon-2026-azora.vercel.app/](https://amazon-hackon-2026-azora.vercel.app/)
+
+---
+
 ## Description
 
 **Azora** is an AI-powered goal-based shopping assistant that integrates with Amazon to help users shop by *goal* instead of searching for products one by one.
@@ -48,8 +54,8 @@ Built for the **Amazon HackOn 2026** hackathon.
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│   Frontend  │────▶️│   Backend    │────▶️│  Supabase   │
-│  (Next.js)  │◀️────│  (FastAPI)   │◀️────│ (PostgreSQL)│
+│   Frontend  │────▶│   Backend    │────▶│  Supabase   │
+│  (Next.js)  │◀────│  (FastAPI)   │◀────│ (PostgreSQL)│
 └─────────────┘     └──────┬───────┘     └─────────────┘
                            │
                     ┌──────▼───────┐
