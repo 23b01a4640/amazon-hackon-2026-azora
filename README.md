@@ -20,17 +20,21 @@ Built for the **Amazon HackOn 2026** hackathon.
 
 - **Adaptive Questions** - AI generates contextual clarifying questions with relevant options specific to each product type
 
-- **Smart Product Search** - Budget-aware, preference-filtered product search with relevance ranking
+- **Smart Product Search** - Budget-aware, preference-filtered product search with AI-powered keyword matching and relevance ranking
 
-- **Image-Based Discovery** - Upload a photo and Groq Vision identifies products, returning matching items from the catalog
+- **Intent-Aware Visual Product Search** - Upload a photo with a text query and Groq Vision identifies the product, classifies user intent (similar, complementary, or bundle), and retrieves results accordingly
+
+- **Multi-Select Cart** - Select multiple products from search results with Select All, individual checkboxes, and Add Selected to Cart with real-time total
 
 - **Bundle Customization** - Add/remove products from bundles with real-time price recalculation
 
+- **Smart Repurchase-Aware Recommendations** - Distinguishes between repurchasable products (skincare, groceries) and non-repurchasable products (electronics, furniture) - only excludes non-repurchasable items from future recommendations
+
 - **Persistent Customer Memory** - System remembers past purchases, removed products, budget preferences, and brand preferences across sessions
 
-- **Personalized Recommendations** - Returning users get bundles that exclude previously purchased items and prioritize preferred brands
+- **Personalized Recommendations** - Returning users get bundles that respect repurchase logic and prioritize preferred brands
 
-- **Amazon Integration** - Seamless flow from Azora bundles to Amazon-style cart page with Azora icon for quick access
+- **Amazon Integration** - Seamless flow from Azora bundles to Amazon-style cart page with functional checkboxes, quantity controls, and Azora icon for quick access
 
 - **Authentication** - Amazon-themed login/signup using Supabase Auth with session persistence
 
@@ -44,8 +48,8 @@ Built for the **Amazon HackOn 2026** hackathon.
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│   Frontend  │────▶│   Backend    │────▶│  Supabase   │
-│  (Next.js)  │◀────│  (FastAPI)   │◀────│ (PostgreSQL)│
+│   Frontend  │────▶️│   Backend    │────▶️│  Supabase   │
+│  (Next.js)  │◀️────│  (FastAPI)   │◀️────│ (PostgreSQL)│
 └─────────────┘     └──────┬───────┘     └─────────────┘
                            │
                     ┌──────▼───────┐
@@ -72,7 +76,7 @@ Built for the **Amazon HackOn 2026** hackathon.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/amazon-hackon-2026-azora.git
+git clone https://github.com/23b01a4640/amazon-hackon-2026-azora.git
 
 # Navigate to project directory
 cd amazon-hackon-2026-azora
@@ -132,15 +136,15 @@ amazon-hackon-2026-azora/
 │   │   └── supabase_client.py     # Supabase connection
 │   ├── services/
 │   │   ├── groq_service.py        # Groq LLM integration
-│   │   └── memory_service.py      # User memory & personalization
+│   │   └── memory_service.py      # User memory, personalization & repurchase logic
 │   ├── routes/
 │   │   ├── understand.py          # POST /understand (goal classification)
 │   │   ├── questions.py           # POST /questions (goal questions)
 │   │   ├── adaptive_questions.py  # POST /adaptive-questions (AI-generated)
 │   │   ├── bundles.py             # GET /bundles/{mission} (personalized)
 │   │   ├── products.py            # GET /products/search
-│   │   ├── smart_search.py        # POST /products/smart-search
-│   │   ├── image_search.py        # POST /image-search (vision)
+│   │   ├── smart_search.py        # POST /products/smart-search (AI-filtered)
+│   │   ├── image_search.py        # POST /image-search (intent-aware vision)
 │   │   └── memory.py              # POST /memory/purchase & interaction
 │   └── requirements.txt
 ├── frontend/
@@ -148,11 +152,11 @@ amazon-hackon-2026-azora/
 │   │   ├── page.js                # Amazon homepage (root)
 │   │   ├── login/page.js          # Amazon-themed login
 │   │   ├── signup/page.js         # Amazon-themed signup
-│   │   ├── amazon/page.js         # Amazon cart page
+│   │   ├── amazon/page.js         # Amazon cart page (functional checkboxes)
 │   │   ├── azora/                 # Azora app (protected)
 │   │   │   ├── page.js            # Azora homepage
 │   │   │   ├── questions/         # Adaptive questions flow
-│   │   │   ├── bundles/           # Bundle display & detail
+│   │   │   ├── bundles/           # Bundle display, search results & multi-select
 │   │   │   ├── checkout/          # Checkout summary
 │   │   │   └── redirect/          # Cart redirect animation
 │   │   ├── components/            # Reusable UI components
@@ -180,13 +184,15 @@ Azora Homepage (Search by text, image, or goal cards)
 │  Personalized Bundles  │  Filtered Results│
 │  (Essentials/Best/     │  (Budget+Type)  │
 │   Premium)             │       |         │
-│       |                │  Add to Cart    │
-│  Customize Bundle      │                 │
+│       |                │  Select & Add   │
+│  Customize Bundle      │  to Cart        │
 │       |                │                 │
 │  Checkout              │                 │
 └──────────┬─────────────┴─────────────────┘
            |
-    Amazon Cart Page
+    Amazon Cart Page (Select items - Proceed to Buy)
+           |
+    Only checked items saved as purchases
 ```
 
 ---
@@ -197,8 +203,37 @@ Azora Homepage (Search by text, image, or goal cards)
 |---------|-------|---------|
 | Goal Classification | Llama 3.1 8B | Understand user intent from natural language |
 | Adaptive Questions | Llama 3.1 8B | Generate contextual questions with options |
-| Image Search | Llama 4 Scout 17B | Identify products from uploaded photos |
-| Personalization | Memory Service | Exclude purchased items, prefer brands |
+| Smart Product Filtering | Llama 3.1 8B | AI-powered filtering when keyword matching fails |
+| Intent-Aware Image Search | Llama 4 Scout 17B | Identify products and classify intent (similar/complementary/bundle) |
+| Personalization | Memory Service | Repurchase-aware filtering, brand preference |
+
+---
+
+## Smart Repurchase-Aware Recommendations
+
+The system distinguishes between product types for intelligent filtering:
+
+| Category Type | Examples | Behavior After Purchase |
+|---------------|----------|------------------------|
+| Repurchasable | Sunscreen, Moisturizer, Protein Powder, Shampoo | Still appears in future recommendations |
+| Non-Repurchasable | Mouse, Office Chair, Monitor, Backpack, Laptop Stand | Excluded from future recommendations |
+
+Repurchasable categories: Skincare, Fitness Nutrition, Personal Care, Grocery
+
+Non-Repurchasable categories: Clothing, Electronics, Furniture, Backpack, Monitor, Study Essentials, Computer Accessories, Laptop Accessories, Storage, Home Decor
+
+---
+
+## Intent-Aware Visual Product Search
+
+Upload an image with an optional text query to get intent-specific results:
+
+| Intent | Example Query | Behavior |
+|--------|--------------|----------|
+| Similar | "Find similar shirts" | Returns products from the same category |
+| Complementary | "Suggest pants for this shirt" | Returns products from the requested complementary category |
+| Bundle | "Build a skincare routine around this" | Generates a bundle of complementary products |
+| No query | (image only) | Default similar product search |
 
 ---
 
@@ -206,9 +241,9 @@ Azora Homepage (Search by text, image, or goal cards)
 
 | Table | Purpose |
 |-------|---------|
-| `products` | 120+ products across 5 goals |
+| `products` | 120+ products |
 | `search_history` | User search queries & detected goals |
-| `user_purchases` | Purchase history for personalization |
+| `user_purchases` | Purchase history with category for repurchase logic |
 | `user_interactions` | Product add/remove tracking |
 | `mission_templates` | Goal definitions |
 | `category_priorities` | Category priority info |
@@ -219,13 +254,13 @@ Azora Homepage (Search by text, image, or goal cards)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/understand` | Classify user query into mission |
+| POST | `/understand` | Classify user query into mission or direct product |
 | POST | `/questions` | Get mission-specific questions |
 | POST | `/adaptive-questions` | AI-generated product questions |
-| GET | `/bundles/{mission}` | Personalized bundle generation |
+| GET | `/bundles/{mission}` | Personalized bundle generation (repurchase-aware) |
 | GET | `/products/search` | Search products by keyword |
-| POST | `/products/smart-search` | Budget+preference filtered search |
-| POST | `/image-search` | Vision-based product discovery |
+| POST | `/products/smart-search` | AI-filtered search with budget, preferences & repurchase awareness |
+| POST | `/image-search` | Intent-aware vision-based product discovery |
 | POST | `/memory/purchase` | Save purchase history |
 | POST | `/memory/interaction` | Save product interactions |
 | GET | `/products/mission/{name}` | All products for a mission |
